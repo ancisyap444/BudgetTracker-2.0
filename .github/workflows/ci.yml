@@ -1,0 +1,56 @@
+name: Flutter CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Lint, Test & Web Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+
+      - name: Install Project Dependencies
+        working-directory: budget_tracker
+        run: flutter pub get
+
+      - name: Verify Code Formatting
+        working-directory: budget_tracker
+        run: dart format --line-length 80 --output=none --set-exit-if-changed .
+
+      - name: Static Code Analysis
+        working-directory: budget_tracker
+        run: flutter analyze --no-fatal-infos
+
+      - name: Run Test Verification Suite
+        working-directory: budget_tracker
+        run: dart run test/verify_runner.dart
+
+      - name: Build Web Release
+        working-directory: budget_tracker
+        run: flutter build web --release
+
+      - name: Upload Web Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: budget-tracker-web-release
+          path: budget_tracker/build/web
