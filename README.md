@@ -2,7 +2,6 @@
 
 A personal finance and expense tracking app built with Flutter and Supabase.
 
-Recreated, improved, and maintained by **Francis Vernard Yap** ([@ancisyap444](https://github.com/ancisyap444)).
 
 ---
 
